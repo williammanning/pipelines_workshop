@@ -1,1 +1,1 @@
-# pipelines_workshop
+# <Your Name>jfrog-pipelines-docker-build-push

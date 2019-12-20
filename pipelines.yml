@@ -1,0 +1,69 @@
+resources:
+  - name: yournane_repo_1_docker_build_push #make this unique to your > use your first name 
+    type: GitRepo 
+    configuration:
+      gitProvider: Github_SolEng   # replace with your integration, we will use the default SolEngDemo repo
+      path: jfrog/SolEngDemo    # replace with your repository path
+      branches:
+        include: master
+
+  - name: yournane_build_info_1_docker_build_push
+    type: BuildInfo
+    configuration:
+      sourceArtifactory: ArtifactoryHA
+      buildName: svc_build
+      buildNumber: 1
+
+  - name: yournane_promoted_build_info
+    type: BuildInfo
+    configuration:
+      sourceArtifactory: ArtifactoryHA
+      buildName: svc_build
+      buildNumber: 1
+
+
+pipelines:
+  - name: yournane_pipeline_docker_build_push
+    steps:
+      - name: docker_build
+        type: DockerBuild
+        configuration:
+          dockerFileLocation: .
+          dockerFileName: Dockerfile
+          dockerImageName: pipe-master.jfrog.info:8082/docker-local/<YOURNAME>
+          dockerImageTag: ${run_number}
+          inputResources:
+            - name: repo_1_docker_build_push
+          integrations:
+            - name: ArtifactoryHA
+
+      - name: docker_push
+        type: DockerPush
+        configuration:
+          targetRepository: docker-local #replace with your own Docker repo
+          integrations:
+            - name: ArtifactoryHA
+          inputSteps:
+            - name: docker_build
+
+      - name: publish_build_info
+        type: PublishBuildInfo
+        configuration:
+          inputSteps:
+            - name: docker_push
+          outputResources:
+            - name: build_info_1_docker_build_push
+
+      - name: promote_build
+        type: PromoteBuild
+        configuration:
+          targetRepository: docker-prod-local
+          includeDependencies: true
+          status: Released
+          comment: Test
+          integrations:
+            - name: ArtifactoryHA
+          inputResources:
+            - name: build_info_1_docker_build_push
+          outputResources:
+            - name: promoted_build_info
