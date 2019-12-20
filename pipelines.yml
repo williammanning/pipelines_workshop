@@ -41,8 +41,7 @@ pipelines:
       - name: docker_push
         type: DockerPush
         configuration:
-          affinityGroup: wmanning_group
-          targetRepository: docker-local #replace with your own Docker repo
+          targetRepository: docker-dev-local #replace with your own Docker repo
           integrations:
             - name: ArtifactoryHA
           inputSteps:
