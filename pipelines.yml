@@ -68,4 +68,4 @@ pipelines:
           inputResources:
             - name: wmanning_build_info_1_docker_build_push
           outputResources:
-            - name: promoted_build_info
+            - name: wmanning_promoted_build_info
