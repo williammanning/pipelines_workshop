@@ -1,20 +1,20 @@
 resources:
-  - name: yournane_repo_1_docker_build_push #make this unique to your > use your first name 
+  - name: wmanning_repo_1_docker_build_push #make this unique to your > use your first name 
     type: GitRepo 
     configuration:
-      gitProvider: Github_SolEng   # replace with your integration, we will use the default SolEngDemo repo
-      path: jfrog/SolEngDemo    # replace with your repository path
+      gitProvider: Github_wmanning   # replace with your integration, we will use the default SolEngDemo repo
+      path: williammanning/pipelines_workshop    # replace with your repository path
       branches:
         include: master
 
-  - name: yournane_build_info_1_docker_build_push
+  - name: wmanning_build_info_1_docker_build_push
     type: BuildInfo
     configuration:
       sourceArtifactory: ArtifactoryHA
       buildName: svc_build
       buildNumber: 1
 
-  - name: yournane_promoted_build_info
+  - name: wmanning_promoted_build_info
     type: BuildInfo
     configuration:
       sourceArtifactory: ArtifactoryHA
@@ -23,23 +23,25 @@ resources:
 
 
 pipelines:
-  - name: yournane_pipeline_docker_build_push
+  - name: wmanning_pipeline_docker_build_push
     steps:
       - name: docker_build
         type: DockerBuild
         configuration:
+          affinityGroup: wmanning_group
           dockerFileLocation: .
           dockerFileName: Dockerfile
-          dockerImageName: pipe-master.jfrog.info:8082/docker-local/<YOURNAME>
+          dockerImageName: docker.artifactory-cluster.soleng-us.jfrog.team/wmanning_pipeline
           dockerImageTag: ${run_number}
           inputResources:
-            - name: repo_1_docker_build_push
+            - name: wmanning_repo_1_docker_build_push
           integrations:
             - name: ArtifactoryHA
 
       - name: docker_push
         type: DockerPush
         configuration:
+          affinityGroup: wmanning_group
           targetRepository: docker-local #replace with your own Docker repo
           integrations:
             - name: ArtifactoryHA
@@ -52,7 +54,7 @@ pipelines:
           inputSteps:
             - name: docker_push
           outputResources:
-            - name: build_info_1_docker_build_push
+            - name: wmanning_build_info_1_docker_build_push
 
       - name: promote_build
         type: PromoteBuild
@@ -64,6 +66,6 @@ pipelines:
           integrations:
             - name: ArtifactoryHA
           inputResources:
-            - name: build_info_1_docker_build_push
+            - name: wmanning_build_info_1_docker_build_push
           outputResources:
             - name: promoted_build_info
